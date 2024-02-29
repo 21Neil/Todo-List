@@ -1,5 +1,7 @@
+import generateID from './generateID';
+
 const todo = (() => {
-  const todoList = {};
+  const todoList = localStorage.todoList ? JSON.parse(localStorage.todoList) : {};
 
   const createItem = (title, description, dueDate, priority, project, id) => ({
     id,
@@ -10,11 +12,10 @@ const todo = (() => {
     project,
   });
 
-  const generateID = () => self.crypto.randomUUID();
-
   const addItem = (title, description, dueDate, priority, project) => {
     const id = generateID();
     todoList[id] = createItem(title, description, dueDate, priority, project, id);
+    return id;
   };
 
   const deleteItem = id => {
@@ -29,14 +30,17 @@ const todo = (() => {
     todoList[id].project = project;
   };
 
-  const getTodoList = () => todoList;
+  const projectTodoList = todoIDList => todoIDList.map(id => todoList[id]);
 
   return {
     createItem,
     addItem,
     deleteItem,
     changeItem,
-    getTodoList,
+    get getTodoList() {
+      return todoList;
+    },
+    projectTodoList,
   };
 })();
 

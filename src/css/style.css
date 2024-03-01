@@ -1,0 +1,21 @@
+nav {
+  width: 200px;
+}
+
+.todo-section {
+  width: 600px;
+}
+
+.sort-btn {
+  width: 140px;
+}
+
+.round-check[type=checkbox] {
+  width: 1.3em;
+  height: 1.3em;
+  border-radius: 1.3em;
+}
+
+.description {
+  padding-left: 2.8em;
+}

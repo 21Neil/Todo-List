@@ -1,13 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Todo List</title>
-</head>
-<body>
-  <button id="add">add</button>
-  <button id="delete">delete</button>
-  <button id="change">change</button>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Todo List</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+    />
+  </head>
+  <body>
+    <div class="container-fluid p-0">
+      <div class="d-flex">
+        <nav class="border-end vh-100 p-0">
+          <div class="mt-5">
+            <div>
+              <button class="btn w-100 text-start fs-6">All</button>
+            </div>
+            <div>
+              <button class="btn w-100 text-start fs-6">Day</button>
+            </div>
+            <div>
+              <button class="btn w-100 text-start fs-6">Week</button>
+            </div>
+          </div>
+          <div class="mt-5">
+            <div>
+              <button class="btn w-100 text-start fs-6">project1</button>
+            </div>
+            <div>
+              <button class="btn w-100 text-start fs-6">project2</button>
+            </div>
+          </div>
+        </nav>
+        <main class="container-fluid p-0">
+          <h1 class="fs-6 text-center border-bottom p-2">project1</h1>
+          <section class="text-center todo-section m-auto mt-3">
+            <button class="btn d-flex align-items-center ms-auto p-1 sort-btn">
+              <span class="material-symbols-outlined fs-5 text-secondary-emphasis"> sort </span>
+              <p class="fs-6 fw-light m-0 ms-auto text-secondary">按優先度排序</p>
+            </button>
+            <article class="border-bottom border-top">
+              <div class="d-flex justify-content-start gap-3 align-items-center">
+                <input class="form-check-input round-check m-0" type="checkbox" />
+                <div class="text-start mt-2 mb-2">
+                  <h2 class="fs-4 m-0 text-start p-2">do something</h2>
+                </div>
+              </div>
+              <p class="text-start m-0 fs-6 fw-light pb-4 description">you need to do thing</p>
+            </article>
+            <button class="btn fs-6 fw-light text-secondary d-flex ms-auto">+Add</button>
+          </section>
+        </main>
+      </div>
+    </div>
+  </body>
 </html>

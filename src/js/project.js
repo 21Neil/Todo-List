@@ -15,25 +15,30 @@ const project = (() => {
 
   const addProject = projectName => {
     const id = generateID();
-    projects[id] = createProject(id, projectName);
+    const newProject = createProject(id, projectName);
+    projects[id] = newProject;
+    localStorage.setItem('projects', JSON.stringify(projects));
+    return [{ id: newProject.id, projectName: newProject.projectName }];
   };
 
   const addTodoToProject = (projectID, todoID) => {
     projects[projectID].todoIDList.push(todoID);
+    localStorage.setItem('projects', JSON.stringify(projects));
   };
 
   const switchProject = projectID => {
     currentProjectID = projectID;
-    return currentProjectID;
   };
 
   const changeProjectName = (projectID, name) => {
-    projects[projectID].projectName = name
-  }
+    projects[projectID].projectName = name;
+    localStorage.setItem('projects', JSON.stringify(projects));
+  };
 
-  const deleteProject = (projectID) => {
-    delete projects[projectID]
-  }
+  const deleteProject = projectID => {
+    delete projects[projectID];
+    localStorage.setItem('projects', JSON.stringify(projects));
+  };
 
   const getProject = id => projects[id];
 

@@ -315,7 +315,6 @@ const todoDom = (() => {
       if (projectID.value !== '') project.addTodoToProject(projectID.value, todoID);
 
       renderTodoList(project.determineTodoListToReturn);
-      console.log(todoModal);
       todoModal.hide();
     }
     // confirm button
@@ -384,7 +383,7 @@ const todoDom = (() => {
       if (todoDetail.project !== '' && projectID.value !== todoDetail.project)
         project.deleteTodoToProject(todoDetail.project, id);
 
-      if (projectID.value !== '') project.addTodoToProject(projectID.value, id);
+      if (projectID.value !== ''&& projectID.value !== todoDetail.project) project.addTodoToProject(projectID.value, id);
 
       todo.changeItem(
         id,

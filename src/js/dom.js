@@ -1,5 +1,6 @@
 import project from './project';
 import todo from './todo';
+import { Modal } from 'bootstrap';
 
 const changeProjectName = name => {
   const projectHeader = document.querySelector('#project-header');
@@ -209,13 +210,12 @@ const todoDom = (() => {
     article.classList.add('border-bottom', 'd-flex', 'justify-content-between');
     article.appendChild(leftArea);
     article.appendChild(rightArea);
-    article.dataset.id = todo.id
     rightArea.appendChild(deleteBtn);
     deleteBtn.classList.add('btn', 'p-0', 'h-100');
     deleteBtn.appendChild(deleteSpan);
     deleteSpan.classList.add('material-symbols-outlined', 'text-danger', 'fs-5', 'p-1');
     deleteSpan.textContent = ' delete ';
-    leftArea.classList.add('flex-fill', 'edit-todo')
+    leftArea.classList.add('flex-fill', 'edit-todo');
     leftArea.appendChild(headerGroupContainer);
     leftArea.appendChild(p);
     headerGroupContainer.classList.add(
@@ -237,21 +237,20 @@ const todoDom = (() => {
 
     deleteBtn.addEventListener('click', () => todoDeleteOnClick(todo.id));
 
-    leftArea.addEventListener('click', editTodo)
+    leftArea.addEventListener('click', () => editTodo(todo.id));
   };
   // render todo list
 
-  // add todo
-  const todoModal = document.querySelector('#add-todo')
-  const addTodoBtn = document.querySelector('#add-todo-btn');
+  const todoModal = document.querySelector('#todo-modal');
 
-  todoModal.addEventListener('shown.bs.modal', () => {
+  todoModal.addEventListener('hidden.bs.modal', () => {
     // reset field
     const title = document.querySelector('#title');
     const description = document.querySelector('#description');
     const dueDate = document.querySelector('#due-date');
     const priority = document.querySelector('#priority');
     const projectID = document.querySelector('#project');
+
     title.value = '';
     description.value = '';
     dueDate.value = '';
@@ -259,14 +258,66 @@ const todoDom = (() => {
     projectID.value = '';
     // reset field
 
-    document.querySelector('#title').focus()
-  })
+    // remove button
+    const addConfirmBtn = document.querySelector('#add-confirm');
+    const changeConfirmBtn = document.querySelector('#change-confirm');
+
+    if (addConfirmBtn) addConfirmBtn.remove();
+    if (changeConfirmBtn) changeConfirmBtn.remove();
+    // remove button
+  });
+
+  // focus title
+  todoModal.addEventListener('shown.bs.modal', () => {
+    document.querySelector('#title').focus();
+  });
+  // focus title
+
+  // add todo
+  const addTodoBtn = document.querySelector('#add-todo-btn');
 
   addTodoBtn.addEventListener('click', addTodoBtnOnClick);
 
   function addTodoBtnOnClick() {
+    const todoModal = new Modal('#todo-modal');
+    todoModal.show();
+    // confirm button
+    const modalFooter = document.querySelector('.modal-footer');
+    const confirmAddBtn = document.createElement('button');
+
+    modalFooter.appendChild(confirmAddBtn);
+    confirmAddBtn.classList.add('btn', 'btn-primary');
+    confirmAddBtn.textContent = 'Add';
+    confirmAddBtn.id = 'add-confirm';
+
+    confirmAddBtn.addEventListener('click', addConfirmBtnOnClick);
+
+    function addConfirmBtnOnClick() {
+      const title = document.querySelector('#title');
+      const description = document.querySelector('#description');
+      const dueDate = document.querySelector('#due-date');
+      const priority = document.querySelector('#priority');
+      const projectID = document.querySelector('#project');
+
+      const todoID = todo.addItem(
+        title.value,
+        description.value,
+        dueDate.value,
+        priority.value,
+        projectID.value
+      );
+
+      if (projectID.value !== '') project.addTodoToProject(projectID.value, todoID);
+
+      renderTodoList(project.determineTodoListToReturn);
+      console.log(todoModal);
+      todoModal.hide();
+    }
+    // confirm button
+
+    // set default project
     const projectSelect = document.querySelector('#project');
-    
+
     if (
       project.getCurrentProjectID === 'btn-all' ||
       project.getCurrentProjectID === 'btn-day' ||
@@ -275,39 +326,74 @@ const todoDom = (() => {
       projectSelect.value = '';
       return;
     }
-    
+
     projectSelect.value = project.getCurrentProjectID;
+    // set default project
   }
 
-  const confirmAddBtn = document.querySelector('#confirm-add');
+  // add todo
 
-  confirmAddBtn.addEventListener('click', addConfirmBtnOnClick);
+  // edit todo
+  function editTodo(id) {
+    const todoModal = new Modal('#todo-modal');
+    const todoDetail = todo.getTodoDetail(id);
 
-  function addConfirmBtnOnClick() {
     const title = document.querySelector('#title');
     const description = document.querySelector('#description');
     const dueDate = document.querySelector('#due-date');
     const priority = document.querySelector('#priority');
     const projectID = document.querySelector('#project');
 
-    const todoID = todo.addItem(
-      title.value,
-      description.value,
-      dueDate.value,
-      priority.value,
-      projectID.value
-    );
+    title.value = todoDetail.title;
+    description.value = todoDetail.description;
+    dueDate.value = todoDetail.dueDate;
+    priority.value = todoDetail.priority;
+    projectID.value = todoDetail.project;
 
-    if (projectID.value !== '') project.addTodoToProject(projectID.value, todoID);
+    todoModal.show();
 
-    renderTodoList(project.determineTodoListToReturn);
+    // change todo button
+    const modalFooter = document.querySelector('.modal-footer');
+    const confirmChangeBtn = document.createElement('button');
 
-  }
-  // add todo
+    modalFooter.appendChild(confirmChangeBtn);
+    confirmChangeBtn.classList.add('btn', 'btn-primary');
+    confirmChangeBtn.textContent = 'Change';
+    confirmChangeBtn.id = 'add-confirm';
 
-  // edit todo 
-  function editTodo(e) {
-    console.log(e)
+    confirmChangeBtn.addEventListener('click', changeConfirmBtnOnClick);
+
+    function changeConfirmBtnOnClick() {
+      const title = document.querySelector('#title');
+      const description = document.querySelector('#description');
+      const dueDate = document.querySelector('#due-date');
+      const priority = document.querySelector('#priority');
+      const projectID = document.querySelector('#project');
+
+      // if (projectID.value === '' && todoDetail.project !== '')
+      //   if (projectID.value !== '' && projectID.value !== todoDetail.project) {
+      //     if (todoDetail.project) project.deleteTodoToProject(todoDetail.project, id);
+      //     project.addTodoToProject(projectID.value, id);
+      //   }
+
+      if (todoDetail.project !== '' && projectID.value !== todoDetail.project)
+        project.deleteTodoToProject(todoDetail.project, id);
+
+      if (projectID.value !== '') project.addTodoToProject(projectID.value, id);
+
+      todo.changeItem(
+        id,
+        title.value,
+        description.value,
+        dueDate.value,
+        priority.value,
+        projectID.value
+      );
+
+      renderTodoList(project.determineTodoListToReturn);
+      todoModal.hide();
+    }
+    // change todo button
   }
   // edit todo
 

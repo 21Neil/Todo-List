@@ -1,0 +1,37 @@
+nav {
+  width: 200px;
+}
+
+.todo-section {
+  width: 600px;
+}
+
+.sort-btn {
+  width: 90px;
+}
+
+.round-check[type=checkbox] {
+  width: 1.3em;
+  height: 1.3em;
+  border-radius: 1.3em;
+}
+
+.description {
+  padding-left: 2.8em;
+}
+
+textarea {
+  resize: none;
+}
+
+.text-small {
+  font-size: small;
+}
+
+.edit-todo {
+  cursor: pointer;
+}
+
+.edit-todo:hover {
+  background: #e7e7e7;
+}

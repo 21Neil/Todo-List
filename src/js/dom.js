@@ -20,26 +20,51 @@ const manageNavBold = dataID => {
   projectNavElement.classList.add('fw-bold');
 };
 
-const showAllTodo = () => {
-  const deleteProjectBtn = document.querySelector('#delete-project-btn');
-  const projectHeader = document.querySelector('#project-header');
+const renderOpt = projectList => {
+  const projectSelect = document.querySelector('#project');
 
-  deleteProjectBtn.classList.add('d-none');
-  projectHeader.classList.add('me-auto');
-  manageNavBold('btn-all');
-  changeProjectName('All');
-  todoDom.renderAllTodo();
+  projectList.forEach(project => {
+    const opt = document.createElement('option');
+    opt.text = project.projectName;
+    opt.value = project.id;
+    projectSelect.add(opt);
+  });
 };
 
 const dom = () => {
   const btnAll = document.querySelector("[data-id = 'btn-all']");
-  const btnDay = document.querySelector('#btn-day');
-  const btnWeek = document.querySelector('#btn-week');
+  const btnDay = document.querySelector("[data-id = 'btn-day']");
+  const btnWeek = document.querySelector("[data-id = 'btn-week']");
 
-  btnAll.addEventListener('click', showAllTodo);
+  btnAll.addEventListener('click', () => {
+    navBtnOnClick('All');
+    todoDom.renderTodoList(todo.getAllTodoListArray);
+  });
+  btnDay.addEventListener('click', () => {
+    navBtnOnClick('Day');
+    todoDom.renderTodoList(todo.getDayTodo);
+  });
+  btnWeek.addEventListener('click', () => {
+    navBtnOnClick('Week');
+    todoDom.renderTodoList(todo.getWeekTodo);
+  });
 
-  showAllTodo();
+  todoDom.renderTodoList(todo.getAllTodoListArray);
+  navBtnOnClick('All');
   projectDom();
+  project.switchProject('btn-all');
+
+  function navBtnOnClick(period) {
+    const deleteProjectBtn = document.querySelector('#delete-project-btn');
+
+    if (!deleteProjectBtn.classList.value.includes('d-none')) {
+      deleteProjectBtn.classList.add('d-none');
+    }
+
+    manageNavBold(`btn-${period.toLowerCase()}`);
+    project.switchProject(`btn-${period.toLowerCase()}`);
+    changeProjectName(period);
+  }
 };
 
 const projectDom = () => {
@@ -58,6 +83,7 @@ const projectDom = () => {
       btn.textContent = project.projectName;
       btn.addEventListener('click', () => renderProject(project.id));
     });
+    renderOpt(projectList);
   }
 
   if (project.getProjects.length !== 0) renderProjectList(project.getProjects);
@@ -84,6 +110,12 @@ const projectDom = () => {
 
   function addProject(e) {
     const inputContainer = document.querySelector('#input-container');
+
+    if (!e.target.value) {
+      inputContainer.remove();
+      return;
+    }
+
     const newProject = project.addProject(e.target.value);
 
     renderProjectList(newProject);
@@ -99,11 +131,11 @@ const projectDom = () => {
     const currentProject = project.getProject(projectID);
     const deleteProjectBtn = document.querySelector('#delete-project-btn');
 
-    deleteProjectBtn.classList.remove('d-none')
+    deleteProjectBtn.classList.remove('d-none');
     deleteProjectBtn.addEventListener('click', deleteProject);
     manageNavBold(projectID);
     changeProjectName(currentProject.projectName);
-    todoDom.renderTodoList(currentProject.todoIDList);
+    todoDom.renderTodoList(todo.getProjectTodoListArray(currentProject.todoIDList));
   }
   // render project
 
@@ -111,12 +143,37 @@ const projectDom = () => {
 
   function deleteProject() {
     const projectNav = document.querySelector(`[data-id = '${project.getCurrentProjectID}']`);
+    const projectOpt = document.querySelector(`[value = '${project.getCurrentProjectID}']`);
 
     project.deleteProject(project.getCurrentProjectID);
     showAllTodo();
     projectNav.remove();
+    projectOpt.remove();
   }
   // delete project
+
+  // priority
+  const priorityBtn = document.querySelector('#priority-btn');
+  let sort = false;
+
+  priorityBtn.addEventListener('click', priorityBtnOnClick);
+
+  function priorityBtnOnClick() {
+    sort = !sort;
+    if (sort) {
+      const todoList = project.determineTodoListToReturn;
+      const priority = ['urgent', 'important', 'normal'];
+
+      todoList.sort((a, b) => priority.indexOf(a.priority) - priority.indexOf(b.priority));
+      todoDom.renderTodoList(todoList);
+    }
+    if (!sort) {
+      const todoList = project.determineTodoListToReturn;
+
+      todoDom.renderTodoList(todoList);
+    }
+  }
+  // priority
 };
 
 const todoDom = (() => {
@@ -124,13 +181,17 @@ const todoDom = (() => {
 
   // render todo list
   const renderTodoList = todoArray => {
-    const hr = document.createElement('div');
-
     todoContainer.replaceChildren();
-    hr.classList.add('border-bottom');
-    todoContainer.appendChild(hr);
     todoArray.forEach(todo => createTodoArticle(todo));
   };
+
+  function todoDeleteOnClick(id) {
+    if (todo.getTodoDetail(id).project !== '')
+      project.deleteTodoToProject(todo.getTodoDetail(id).project, id);
+    todo.deleteItem(id);
+
+    renderTodoList(project.determineTodoListToReturn);
+  }
 
   const createTodoArticle = todo => {
     const article = document.createElement('article');
@@ -139,11 +200,24 @@ const todoDom = (() => {
     const headerContainer = document.createElement('div');
     const h2 = document.createElement('h2');
     const p = document.createElement('p');
+    const leftArea = document.createElement('div');
+    const rightArea = document.createElement('div');
+    const deleteBtn = document.createElement('button');
+    const deleteSpan = document.createElement('span');
 
     todoContainer.appendChild(article);
-    article.classList.add('border-bottom');
-    article.appendChild(headerGroupContainer);
-    article.appendChild(p);
+    article.classList.add('border-bottom', 'd-flex', 'justify-content-between');
+    article.appendChild(leftArea);
+    article.appendChild(rightArea);
+    article.dataset.id = todo.id
+    rightArea.appendChild(deleteBtn);
+    deleteBtn.classList.add('btn', 'p-0', 'h-100');
+    deleteBtn.appendChild(deleteSpan);
+    deleteSpan.classList.add('material-symbols-outlined', 'text-danger', 'fs-5', 'p-1');
+    deleteSpan.textContent = ' delete ';
+    leftArea.classList.add('flex-fill', 'edit-todo')
+    leftArea.appendChild(headerGroupContainer);
+    leftArea.appendChild(p);
     headerGroupContainer.classList.add(
       'd-flex',
       'justify-content-start',
@@ -152,7 +226,7 @@ const todoDom = (() => {
     );
     headerGroupContainer.appendChild(checkbox);
     headerGroupContainer.appendChild(headerContainer);
-    p.classList.add('text-start', 'm-0', 'fs-6', 'fw-light', 'pb-4', 'description');
+    p.classList.add('text-start', 'm-0', 'fs-6', 'fw-light', 'pb-4', 'description', 'text-break');
     p.textContent = todo.description;
     checkbox.type = 'checkbox';
     checkbox.classList.add('form-check-input', 'round-check', 'm-0');
@@ -160,23 +234,84 @@ const todoDom = (() => {
     headerContainer.appendChild(h2);
     h2.classList.add('fs-4', 'm-0', 'text-start', 'p-2');
     h2.textContent = todo.title;
+
+    deleteBtn.addEventListener('click', () => todoDeleteOnClick(todo.id));
+
+    leftArea.addEventListener('click', editTodo)
   };
   // render todo list
 
   // add todo
+  const todoModal = document.querySelector('#add-todo')
   const addTodoBtn = document.querySelector('#add-todo-btn');
+
+  todoModal.addEventListener('shown.bs.modal', () => {
+    // reset field
+    const title = document.querySelector('#title');
+    const description = document.querySelector('#description');
+    const dueDate = document.querySelector('#due-date');
+    const priority = document.querySelector('#priority');
+    const projectID = document.querySelector('#project');
+    title.value = '';
+    description.value = '';
+    dueDate.value = '';
+    priority.value = 'normal';
+    projectID.value = '';
+    // reset field
+
+    document.querySelector('#title').focus()
+  })
 
   addTodoBtn.addEventListener('click', addTodoBtnOnClick);
 
   function addTodoBtnOnClick() {
-    console.log('first');
+    const projectSelect = document.querySelector('#project');
+    
+    if (
+      project.getCurrentProjectID === 'btn-all' ||
+      project.getCurrentProjectID === 'btn-day' ||
+      project.getCurrentProjectID === 'btn-week'
+    ) {
+      projectSelect.value = '';
+      return;
+    }
+    
+    projectSelect.value = project.getCurrentProjectID;
+  }
+
+  const confirmAddBtn = document.querySelector('#confirm-add');
+
+  confirmAddBtn.addEventListener('click', addConfirmBtnOnClick);
+
+  function addConfirmBtnOnClick() {
+    const title = document.querySelector('#title');
+    const description = document.querySelector('#description');
+    const dueDate = document.querySelector('#due-date');
+    const priority = document.querySelector('#priority');
+    const projectID = document.querySelector('#project');
+
+    const todoID = todo.addItem(
+      title.value,
+      description.value,
+      dueDate.value,
+      priority.value,
+      projectID.value
+    );
+
+    if (projectID.value !== '') project.addTodoToProject(projectID.value, todoID);
+
+    renderTodoList(project.determineTodoListToReturn);
+
   }
   // add todo
-  const renderAllTodo = () => {
-    renderTodoList(todo.getAllTodoListArray);
-  };
 
-  return { renderTodoList, renderAllTodo };
+  // edit todo 
+  function editTodo(e) {
+    console.log(e)
+  }
+  // edit todo
+
+  return { renderTodoList };
 })();
 
 export default dom;

@@ -19,3 +19,19 @@ nav {
 .description {
   padding-left: 2.8em;
 }
+
+textarea {
+  resize: none;
+}
+
+.text-small {
+  font-size: small;
+}
+
+.edit-todo {
+  cursor: pointer;
+}
+
+.edit-todo:hover {
+  background: #e7e7e7;
+}

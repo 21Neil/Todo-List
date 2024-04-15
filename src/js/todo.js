@@ -1,4 +1,5 @@
 import generateID from './generateID';
+import { isToday, isSameWeek } from 'date-fns';
 
 const todo = (() => {
   const todoList = localStorage.todoList ? JSON.parse(localStorage.todoList) : {};
@@ -38,7 +39,10 @@ const todo = (() => {
       id: todoList[id].id,
       title: todoList[id].title,
       description: todoList[id].description,
+      priority: todoList[id].priority,
     }));
+
+  const getTodoDetail = id => todoList[id];
 
   return {
     createItem,
@@ -51,14 +55,23 @@ const todo = (() => {
     get getAllTodoListArray() {
       const todoArray = [...Object.keys(todoList).map(key => todoList[key])];
       return todoArray.map(todo =>
-        (({ id, title, description }) => ({
+        (({ id, title, description, dueDate, priority }) => ({
           id,
           title,
           description,
+          dueDate,
+          priority,
         }))(todo)
       );
     },
+    get getDayTodo() {
+      return todo.getAllTodoListArray.filter(todo => isToday(todo.dueDate));
+    },
+    get getWeekTodo() {
+      return todo.getAllTodoListArray.filter(todo => isSameWeek(new Date(), todo.dueDate));
+    },
     getProjectTodoListArray,
+    getTodoDetail,
   };
 })();
 

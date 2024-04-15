@@ -1,4 +1,5 @@
 import generateID from './generateID';
+import todo from './todo';
 
 const project = (() => {
   const projects = localStorage.projects ? JSON.parse(localStorage.projects) : {};
@@ -23,6 +24,14 @@ const project = (() => {
 
   const addTodoToProject = (projectID, todoID) => {
     projects[projectID].todoIDList.push(todoID);
+    localStorage.setItem('projects', JSON.stringify(projects));
+  };
+
+  const deleteTodoToProject = (projectID, todoID) => {
+    const index = projects[projectID].todoIDList.indexOf(todoID);
+    if (index > -1) {
+      projects[projectID].todoIDList.splice(index, 1);
+    }
     localStorage.setItem('projects', JSON.stringify(projects));
   };
 
@@ -55,8 +64,27 @@ const project = (() => {
     get getCurrentProjectID() {
       return currentProjectID;
     },
+    // determine todo list to return
+    get determineTodoListToReturn() {
+      const currentProject = project.getCurrentProjectID;
+      if (currentProject === 'btn-all') {
+        return todo.getAllTodoListArray;
+      }
+
+      if (currentProject === 'btn-day') {
+        return todo.getDayTodo;
+      }
+
+      if (currentProject === 'btn-week') {
+        return todo.getWeekTodo;
+      }
+
+      return todo.getProjectTodoListArray(project.getProject(currentProject).todoIDList);
+    },
+    // determine todo list to return
     addProject,
     addTodoToProject,
+    deleteTodoToProject,
     switchProject,
     changeProjectName,
     deleteProject,

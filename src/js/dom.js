@@ -238,6 +238,11 @@ const todoDom = (() => {
     deleteBtn.addEventListener('click', () => todoDeleteOnClick(todo.id));
 
     leftArea.addEventListener('click', () => editTodo(todo.id));
+
+    checkbox.addEventListener('click', (e) => {
+      e.stopPropagation()
+      todoDeleteOnClick(todo.id)
+    })
   };
   // render todo list
 
